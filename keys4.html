@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Дни до Нового года</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 360px;
+        }
+
+        h1 {
+            margin-bottom: 24px;
+            color: #333;
+            font-size: 22px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .result {
+            margin-top: 16px;
+            padding: 14px;
+            background: #f4f6fb;
+            border-left: 4px solid #667eea;
+            border-radius: 6px;
+            font-size: 16px;
+            color: #333;
+            min-height: 20px;
+        }
+
+        .result.error {
+            border-left-color: #e74c3c;
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Калькулятор до Нового года</h1>
+
+        <input
+            type="text"
+            id="dateInput"
+            placeholder="дд.мм.гггг"
+            maxlength="10"
+        >
+        <button id="calcBtn">Рассчитать</button>
+
+        <div id="daysResult" class="result"></div>
+        <div id="leapResult" class="result"></div>
+    </div>
+
+    <script>
+        function parseDate(str) {
+            const match = str.trim().match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+            if (!match) return null;
+
+            const day   = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10);
+            const year  = parseInt(match[3], 10);
+
+            const date = new Date(year, month - 1, day);
+
+            if (
+                date.getFullYear() !== year ||
+                date.getMonth() !== month - 1 ||
+                date.getDate() !== day
+            ) {
+                return null;
+            }
+            return date;
+        }
+
+        function daysUntilNewYear(date) {
+            const year = date.getFullYear();
+            const newYear = new Date(year, 11, 31); // 11 = декабрь
+            const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+            const diffMs = newYear.getTime() - start.getTime();
+            return Math.round(diffMs / (1000 * 60 * 60 * 24));
+        }
+
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        document.getElementById('calcBtn').addEventListener('click', () => {
+            const input = document.getElementById('dateInput').value;
+            const daysDiv = document.getElementById('daysResult');
+            const leapDiv = document.getElementById('leapResult');
+
+            daysDiv.classList.remove('error');
+            leapDiv.classList.remove('error');
+
+            const date = parseDate(input);
+
+            if (!date) {
+                daysDiv.textContent = 'Ошибка: введите дату в формате дд.мм.гггг';
+                leapDiv.textContent = '';
+                daysDiv.classList.add('error');
+                return;
+            }
+
+            const days = daysUntilNewYear(date);
+            const year = date.getFullYear();
+            const leap = isLeapYear(year);
+
+            daysDiv.textContent = `До Нового года (${year}): ${days} дн.`;
+            leapDiv.textContent = `${year} год — ${leap ? 'високосный' : 'не високосный'}`;
+        });
+
+        document.getElementById('dateInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('calcBtn').click();
+        });
+    </script>
+</body>
+</html>
